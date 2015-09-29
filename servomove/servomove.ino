@@ -3,66 +3,63 @@
 Servo botservo;  // create servo object to control a servo
 Servo topservo;
 
-int pos = 0;    // variable to store the servo position
-byte i;
+byte i; // variables to store position of each servo
 byte j;
 
 void setup() {
-  botservo.attach(5);  // attaches the servo on pin 9 to the servo object
+  botservo.attach(5);   // attaches servos to respective pins
   topservo.attach(3);
-  Serial.begin(9600);
-  topservo.write(180);
+  Serial.begin(9600);   // open serial connection
+  topservo.write(180);  // reset position of servos
   botservo.write(0);
+  delay(1000);
 }
 
 void loop() {
-  // topservo.write(180);
-  // botservo.write(0);
+  for(i = 92; i >= 70; i-=1) { // sweep top servo
+    topservo.write(i); // move servo to next position
+    delay(100);
 
-  for(i = 160; i >=130; i-=1) {
-    topservo.write(i);
-    botservo.write(90);
-    // delay(20);
-    delay(300);
-    int sensorValue = analogRead(A0); // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V) then to distance:
+    if(i%2 == 0) { // alternate direction of pan servo sweept servo
+      for(j=40; j <= 96; j+=1) {
+        int sensorValue = analogRead(A0); // Convert IR sensor to distance:
         float voltage = sensorValue * (5.0 / 1023.0);
-        float distance = 281.6588-438.174*voltage+306.2413*pow(voltage,2)-98.3268*pow(voltage,3)+11.6707*pow(voltage,4);
-        Serial.print(90);
+        term0 = 281.6588
+        term1 = -438.174*voltage
+        term2 = 306.2413*pow(voltage,2)
+        term3 = -98.3268*pow(voltage,3)
+        term4 = 11.6707*pow(voltage,4)
+        float distance = term0+term1+term2+term3+term4;
+        Serial.print(j); //print out data on servo positions and ir distance
         Serial.print(",");
         Serial.print(i);
         Serial.print(",");
         Serial.println(distance);
-    // if(i%2 == 0) {
-    //   for(j=12; j < 72; j+=2) {
-    //     int sensorValue = analogRead(A0); // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V) then to distance:
-    //     float voltage = sensorValue * (5.0 / 1023.0);
-    //     float distance = 281.6588-438.174*voltage+306.2413*pow(voltage,2)-98.3268*pow(voltage,3)+11.6707*pow(voltage,4);
-    //     Serial.print(j);
-    //     Serial.print(",");
-    //     Serial.print(i);
-    //     Serial.print(",");
-    //     Serial.println(distance);
 
-    //     botservo.write(j);
-    //     delay(300);
-    //   }
-    // }
-    // else {
-    //   for(j=72; j > 12; j-=2) {
-    //     int sensorValue = analogRead(A0); // Read IR sensor (which goes from 0 - 1023) convert to a voltage (0 - 5V) then to distance:
-    //     float voltage = sensorValue * (5.0 / 1023.0);
-    //     float distance = 281.6588-438.174*voltage+306.2413*pow(voltage,2)-98.3268*pow(voltage,3)+11.6707*pow(voltage,4);
-    //     Serial.print(j);
-    //     Serial.print(",");
-    //     Serial.print(i);
-    //     Serial.print(",");
-    //     Serial.println(distance);
+        botservo.write(j); // move servo to next position
+        delay(100);
+      }
+    }
+    else {
+      for(j=96; j >= 40; j-=1) {
+        int sensorValue = analogRead(A0); // Convert IR sensor to distance:
+        float voltage = sensorValue * (5.0 / 1023.0);
+        term0 = 281.6588
+        term1 = -438.174*voltage
+        term2 = 306.2413*pow(voltage,2)
+        term3 = -98.3268*pow(voltage,3)
+        term4 = 11.6707*pow(voltage,4)
+        float distance = term0+term1+term2+term3+term4;
 
-    //     botservo.write(j);
-    //     delay(300);
-    //   }
-    // }
+        Serial.print(j); //print out data on servo positions and ir distance
+        Serial.print(",");
+        Serial.print(i);
+        Serial.print(",");
+        Serial.println(distance);
+
+        botservo.write(j); //move servo to next position
+        delay(100);
+      }
+    }
   }
 }
-
-

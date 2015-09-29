@@ -4,50 +4,57 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import time
 
-ser= serial.Serial('/dev/ttyACM0')
-fig = plt.figure()
+ser= serial.Serial('/dev/ttyACM1') #collect data from Arduino
+
+fig = plt.figure()	#initialize 3d figure
 ax = fig.add_subplot(111, projection='3d')
-X = []
+
+X = []	#empty arrays to gather data
 Y = []
 Z = []
-now = time.time()
-future = now + 15
-plt.ion()
+
+now = time.time() #set time limit for scan
+future = now + 140
+
+plt.ion()	#enable interactive plotting for real-time plotting
 plt.show()
-ax.set_xlabel('X axis')
+ax.set_xlabel('X axis') #create axes labels
 ax.set_ylabel('Y axis')
 ax.set_zlabel('Z axis')
+
 while True:
-	if time.time() > future:
+	if time.time() > future: #end after 140s
 		break
-	try:
-		line = ser.readline()
-		line = line[:-3]
-		print line
-		dis= line.split(',')
-		#print dis
-		theta = ((float(dis[0]))*math.pi)/180.0
-		phi = ((float(dis[1])+10)*math.pi)/180.0
-		# theta = ((float(dis[0])+60)*pi)/180.0
-		# phi = ((float(dis[1])-10)*pi)/180.0
-		r = float(dis[2])
-		x = r*cos(theta)*cos(phi)
-		y = r*sin(theta)*cos(phi)
-		z = r*sin(phi)
-		if z > 15:
-			X.append(x)
-			Y.append(y)
-			Z.append(z)
-			ax.scatter(x, y, z)
-			plt.draw()
-		else:
-			pass
-	except:
+
+	line = ser.readline() #collect Arduino data and parse
+	line = line[:-3]
+	dis= line.split(',')
+
+	theta = ((float(dis[0])+20)*pi)/180.0 #convert to floats and radians
+	phi = -((float(dis[1])-92)*pi)/180.0
+	r = float(dis[2])
+
+	x = r*cos(theta)*cos(phi) #convert spherical coordinates to rectangular
+	y = r*sin(theta)*cos(phi)
+	z = r*sin(phi)
+	# print [x,y,z]
+
+	if r > 15.0 and r < 50: #remove uncalibrated and irrelevant data
+		X.append(x)		#store data for permanent plot
+		Y.append(y)
+		Z.append(z)
+		ax.scatter(x, y, z)	#plot point
+		ax.set_zlim([-10, 20]) #set axes limits
+		ax.set_xlim([-30,30])
+		ax.set_ylim([-30,30])
+		plt.draw()
+	else:
 		pass
-plt.ioff()
-ax.set_xlabel('X axis')
+
+plt.ioff()	#create a permanent plot from collected data
+ax.set_xlabel('X axis') #create axes labels
 ax.set_ylabel('Y axis')
 ax.set_zlabel('Z axis')
-ax.scatter(X, Y, Z)
+ax.scatter(X, Y, Z)	#plot points
 plt.show()
 
